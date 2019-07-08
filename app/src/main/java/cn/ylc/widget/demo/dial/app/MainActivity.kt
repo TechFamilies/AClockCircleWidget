@@ -1,4 +1,4 @@
-package cn.ylc.widget.demo.app
+package cn.ylc.widget.demo.dial.app
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity

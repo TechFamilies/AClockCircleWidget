@@ -1,4 +1,4 @@
-package cn.ylc.widget.clock.circle;
+package cn.ylc.widget.dial;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -16,83 +16,81 @@ import androidx.annotation.Nullable;
  *
  * @author zero.zhou
  */
-public class CircleClockView extends View {
-    private static final String TAG = CircleClockView.class.getSimpleName();
+public class DialView extends View {
+    private static final String TAG = DialView.class.getSimpleName();
 
     private int frameColor;
     private int frameCoverColor;
     private float frameStrokeWidth;
 
-    private float frameRadiusScale;
-
     private int calibrationColor;
     private float calibrationScale;
-    private float calibration2Scale;
+    private float calibrationScale2;
     private float calibrationStrokeWidth;
-    private float calibration2StrokeWidth;
+    private float calibrationStrokeWidth2;
 
     private long runInterval;
     private long stopRunInterval;
 
-    private int calibrationCount;
-    private int calibration2Interval;
+    private float calibrationDegree;
+    private int calibrationDegreeInterval;
 
     private Paint mPaint;
     private Paint mPaint_Calibration, mPaint_Calibration_Strong;
 
     private float frameRadius;
+    private float frameCenterX;
+    private float frameCenterY;
 
     private boolean isRunning = true;
 
-    public CircleClockView(Context context) {
+    public DialView(Context context) {
         this(context, null);
     }
 
-    public CircleClockView(Context context, AttributeSet attrs) {
-        this(context, attrs, R.attr.circleClockViewStyle);
+    public DialView(Context context, AttributeSet attrs) {
+        this(context, attrs, R.attr.dialViewStyle);
     }
 
-    public CircleClockView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public DialView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        initAttr(attrs, defStyleAttr, R.style.CircleClockViewStyle);
+        initAttr(attrs, defStyleAttr, R.style.DialViewStyle);
         init();
     }
 
     private void initAttr(AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        final TypedArray a = getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.CircleClockView, defStyleAttr, defStyleRes);
+        final TypedArray a = getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.DialView, defStyleAttr, defStyleRes);
         for (int i = 0, n = a.getIndexCount(); i < n; i++) {
             int attr = a.getIndex(i);
-            if (attr == R.styleable.CircleClockView_android_minWidth) {
+            if (attr == R.styleable.DialView_android_minWidth) {
                 int size = a.getDimensionPixelSize(i, 0);
                 setMinimumWidth(size);
-            } else if (attr == R.styleable.CircleClockView_android_minHeight) {
+            } else if (attr == R.styleable.DialView_android_minHeight) {
                 int size = a.getDimensionPixelSize(i, 0);
                 setMinimumHeight(size);
-            } else if (attr == R.styleable.CircleClockView_frameColor) {
+            } else if (attr == R.styleable.DialView_frameColor) {
                 frameColor = a.getColor(i, Color.TRANSPARENT);
-            } else if (attr == R.styleable.CircleClockView_frameCoverColor) {
+            } else if (attr == R.styleable.DialView_frameCoverColor) {
                 frameCoverColor = a.getColor(i, Color.RED);
-            } else if (attr == R.styleable.CircleClockView_frameStrokeWidth) {
+            } else if (attr == R.styleable.DialView_frameStrokeWidth) {
                 frameStrokeWidth = a.getDimension(i, 15);
-            } else if (attr == R.styleable.CircleClockView_frameRadiusScale) {
-                frameRadiusScale = a.getFloat(i, 1.0f);
-            } else if (attr == R.styleable.CircleClockView_calibrationStrokeWidth) {
+            } else if (attr == R.styleable.DialView_calibrationStrokeWidth) {
                 calibrationStrokeWidth = a.getDimension(i, 2);
-            } else if (attr == R.styleable.CircleClockView_calibration2StrokeWidth) {
-                calibration2StrokeWidth = a.getDimension(i, 3);
-            } else if (attr == R.styleable.CircleClockView_calibrationColor) {
+            } else if (attr == R.styleable.DialView_calibration2StrokeWidth) {
+                calibrationStrokeWidth2 = a.getDimension(i, 3);
+            } else if (attr == R.styleable.DialView_calibrationColor) {
                 calibrationColor = a.getColor(i, Color.RED);
-            } else if (attr == R.styleable.CircleClockView_calibrationScale) {
+            } else if (attr == R.styleable.DialView_calibrationScale) {
                 calibrationScale = a.getFloat(i, 0.3f);
-            } else if (attr == R.styleable.CircleClockView_calibration2Scale) {
-                calibration2Scale = a.getFloat(i, 0.5f);
-            } else if (attr == R.styleable.CircleClockView_calibrationCount) {
-                calibrationCount = a.getInteger(i, 60);
-            } else if (attr == R.styleable.CircleClockView_calibration2Interval) {
-                calibration2Interval = a.getInteger(i, 5);
-            } else if (attr == R.styleable.CircleClockView_runInterval) {
+            } else if (attr == R.styleable.DialView_calibration2Scale) {
+                calibrationScale2 = a.getFloat(i, 0.5f);
+            } else if (attr == R.styleable.DialView_calibrationDegree) {
+                calibrationDegree = a.getFloat(i, 6f);
+            } else if (attr == R.styleable.DialView_calibrationDegreeInterval) {
+                calibrationDegreeInterval = a.getInteger(i, 5);
+            } else if (attr == R.styleable.DialView_runInterval) {
                 runInterval = a.getInteger(i, 1000);
-            } else if (attr == R.styleable.CircleClockView_stopRunInterval) {
+            } else if (attr == R.styleable.DialView_stopRunInterval) {
                 stopRunInterval = a.getInteger(i, 50);
             }
         }
@@ -114,15 +112,18 @@ public class CircleClockView extends View {
         mPaint_Calibration_Strong = new Paint();
         mPaint_Calibration_Strong.setColor(calibrationColor);
         mPaint_Calibration_Strong.setStyle(Paint.Style.STROKE);//设置描边
-        mPaint_Calibration_Strong.setStrokeWidth(calibration2StrokeWidth);//设置描边线的粗细
+        mPaint_Calibration_Strong.setStrokeWidth(calibrationStrokeWidth2);//设置描边线的粗细
         mPaint_Calibration_Strong.setAntiAlias(true);//设置抗锯齿，使圆形更加圆滑
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         setMeasuredDimension(measure(widthMeasureSpec), measure(heightMeasureSpec));
-        // 计算圆半径
-        frameRadius = Math.min(getMeasuredWidth(), getMeasuredHeight()) * frameRadiusScale / 2;
+        int width1 = getMeasuredWidth() - (getPaddingLeft() + getPaddingRight());
+        int height1 = getMeasuredHeight() - (getPaddingTop() + getPaddingBottom());
+        frameRadius = Math.min(width1, height1) / 2f;
+        frameCenterX = getPaddingLeft() + width1 / 2f;
+        frameCenterY = getPaddingTop() + height1 / 2f;
     }
 
     private int measure(int origin) {
@@ -160,21 +161,20 @@ public class CircleClockView extends View {
         //先保存一下当前画布的状态，因为后面画布会进行旋转操作，而在绘制完刻度后，需要恢复画布状态
         canvas.save();
         //计算12点处刻度的开始坐标
-        float startX = getWidth() / 2f;
-        float startY = getHeight() / 2f - frameRadius;//y坐标即园中心点的y坐标-半径
+        float startX = frameCenterX;
+        float startY = frameCenterY - frameRadius;//y坐标即园中心点的y坐标-半径
         //计算12点处的结束坐标
         float stopX = startX;
         float stopY1 = startY + frameStrokeWidth * calibrationScale;//非整点处的线长度
-        float stopY2 = startY + frameStrokeWidth * calibration2Scale;//整点处的线长度
+        float stopY2 = startY + frameStrokeWidth * calibrationScale2;//整点处的线长度
         //计算画布每次旋转的角度
-        float degree = 360f / calibrationCount;
-        for (int i = 0, total = calibrationCount; i < total; i++) {
-            if (i % calibration2Interval == 0) {
+        for (int i = 0, total = (int) (360 / calibrationDegree); i < total; i++) {
+            if (i % calibrationDegreeInterval == 0) {
                 canvas.drawLine(startX, startY, stopX, stopY2, mPaint_Calibration_Strong);//绘制整点长的刻度
             } else {
                 canvas.drawLine(startX, startY, stopX, stopY1, mPaint_Calibration);//绘制非整点处短的刻度
             }
-            canvas.rotate(degree, getWidth() / 2f, getHeight() / 2f);//以圆中心进行旋转
+            canvas.rotate(calibrationDegree, getWidth() / 2f, getHeight() / 2f);//以圆中心进行旋转
         }
         //绘制完后，记得把画布状态复原
         canvas.restore();
@@ -187,11 +187,9 @@ public class CircleClockView extends View {
         resetPaint();
         mPaint.setStrokeWidth(frameStrokeWidth);
         mPaint.setColor(frameColor);
-        //获得圆的圆点坐标
-        float x = getWidth() / 2f;
-        float y = getHeight() / 2f;
+        //
         float width_half = frameStrokeWidth / 2f;
-        canvas.drawCircle(x, y, frameRadius - width_half, mPaint);
+        canvas.drawCircle(frameCenterX, frameCenterY, frameRadius - width_half, mPaint);
     }
 
     private float runDegree = 0;
@@ -207,7 +205,7 @@ public class CircleClockView extends View {
         RectF rectF = new RectF(0, 0, getWidth(), getHeight());
         rectF.inset(width_half, width_half);
         canvas.save();
-        canvas.rotate(-90, getWidth() / 2f, getHeight() / 2f);//以圆中心进行旋转
+        canvas.rotate(-90, frameCenterX, frameCenterY);//以圆中心进行旋转
         if (runDegree <= 360) {
             canvas.drawArc(rectF, 0, runDegree, false, mPaint);
         } else {
@@ -220,8 +218,7 @@ public class CircleClockView extends View {
      * 计算下一个角度
      */
     private void generateNextDegree() {
-        float degree = 360f / calibrationCount;
-        runDegree = (runDegree + degree) % 720;
+        runDegree = (runDegree + calibrationDegree) % 720;
     }
 
     private void resetPaint() {

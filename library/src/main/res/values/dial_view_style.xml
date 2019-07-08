@@ -1,40 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <attr name="circleClockViewStyle" format="reference"/>
+    <attr name="dialViewStyle" format="reference"/>
 
-    <declare-styleable name="CircleClockView">
+    <declare-styleable name="DialView">
         <attr name="android:minWidth"/>
         <attr name="android:minHeight"/>
         <attr name="frameColor" format="color|reference"/>
         <attr name="frameCoverColor" format="color|reference"/>
         <attr name="frameStrokeWidth" format="dimension|reference"/>
-        <attr name="frameRadiusScale" format="float|reference"/>
         <attr name="calibrationStrokeWidth" format="dimension|reference"/>
         <attr name="calibration2StrokeWidth" format="dimension|reference"/>
         <attr name="calibrationScale" format="float|reference"/>
         <attr name="calibration2Scale" format="float|reference"/>
         <attr name="calibrationColor" format="color|reference"/>
-        <attr name="calibrationCount" format="integer|reference"/>
-        <attr name="calibration2Interval" format="integer|reference"/>
+        <attr name="calibrationDegree" format="float|reference"/>
+        <attr name="calibrationDegreeInterval" format="integer|reference"/>
         <attr name="runInterval" format="integer|reference"/>
         <attr name="stopRunInterval" format="integer|reference"/>
     </declare-styleable>
 
-    <style name="CircleClockViewStyle">
+    <style name="DialViewStyle">
         <item name="android:minWidth">120dp</item>
         <item name="android:minHeight">120dp</item>
         <item name="frameColor">@android:color/black</item>
         <item name="frameCoverColor">@android:color/holo_red_light</item>
         <item name="frameStrokeWidth">5dp</item>
-        <item name="frameRadiusScale">1</item>
         <item name="calibrationStrokeWidth">1.5dp</item>
         <item name="calibration2StrokeWidth">2dp</item>
         <item name="calibrationScale">0.5</item>
         <item name="calibration2Scale">0.6</item>
         <item name="calibrationColor">@android:color/holo_red_light</item>
-        <item name="calibrationCount">60</item>
-        <item name="calibration2Interval">5</item>
+        <item name="calibrationDegree">6.0</item>
+        <item name="calibrationDegreeInterval">5</item>
         <item name="runInterval">1000</item>
         <item name="stopRunInterval">50</item>
     </style>
