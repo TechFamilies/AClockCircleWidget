@@ -105,15 +105,15 @@ public class DialView extends View {
     private void generatePaint() {
         mPaint_Calibration = new Paint();
         mPaint_Calibration.setColor(calibrationColor);
-        mPaint_Calibration.setStyle(Paint.Style.STROKE);//设置描边
-        mPaint_Calibration.setStrokeWidth(calibrationStrokeWidth);//设置描边线的粗细
-        mPaint_Calibration.setAntiAlias(true);//设置抗锯齿，使圆形更加圆滑
+        mPaint_Calibration.setStyle(Paint.Style.STROKE); // 设置描边
+        mPaint_Calibration.setStrokeWidth(calibrationStrokeWidth); // 设置描边线的粗细
+        mPaint_Calibration.setAntiAlias(true); // 设置抗锯齿，使圆形更加圆滑
 
         mPaint_Calibration_Strong = new Paint();
         mPaint_Calibration_Strong.setColor(calibrationColor);
-        mPaint_Calibration_Strong.setStyle(Paint.Style.STROKE);//设置描边
-        mPaint_Calibration_Strong.setStrokeWidth(calibrationStrokeWidth2);//设置描边线的粗细
-        mPaint_Calibration_Strong.setAntiAlias(true);//设置抗锯齿，使圆形更加圆滑
+        mPaint_Calibration_Strong.setStyle(Paint.Style.STROKE); // 设置描边
+        mPaint_Calibration_Strong.setStrokeWidth(calibrationStrokeWidth2); // 设置描边线的粗细
+        mPaint_Calibration_Strong.setAntiAlias(true); // 设置抗锯齿，使圆形更加圆滑
     }
 
     @Override
@@ -145,11 +145,11 @@ public class DialView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        //绘制圆形部分
+        // 绘制圆形部分
         drawFrameCircle(canvas);
-        //绘制刻度线
-        drawClockScale(canvas);
-        //绘制运行时覆盖圆
+        // 绘制刻度线
+        drawCalibration(canvas);
+        // 绘制运行时覆盖圆
         drawFrameCoverCircle(canvas);
     }
 
@@ -157,26 +157,25 @@ public class DialView extends View {
      * 绘制刻度线
      * 从正上方，即12点处开始绘制一条直线，后面的只是旋转一下画布角度即可
      */
-    private void drawClockScale(Canvas canvas) {
-        //先保存一下当前画布的状态，因为后面画布会进行旋转操作，而在绘制完刻度后，需要恢复画布状态
+    private void drawCalibration(Canvas canvas) {
+        // 先保存一下当前画布的状态，因为后面画布会进行旋转操作，而在绘制完刻度后，需要恢复画布状态
         canvas.save();
-        //计算12点处刻度的开始坐标
+        // 计算12点处刻度的开始坐标
         float startX = frameCenterX;
-        float startY = frameCenterY - frameRadius;//y坐标即园中心点的y坐标-半径
-        //计算12点处的结束坐标
+        float startY = frameCenterY - frameRadius;
+        // 计算12点处的结束坐标
         float stopX = startX;
-        float stopY1 = startY + frameStrokeWidth * calibrationScale;//非整点处的线长度
-        float stopY2 = startY + frameStrokeWidth * calibrationScale2;//整点处的线长度
-        //计算画布每次旋转的角度
+        float stopY1 = startY + frameStrokeWidth * calibrationScale; // 非整点处的线长度
+        float stopY2 = startY + frameStrokeWidth * calibrationScale2; // 整点处的线长度
+        // 绘制所有刻度
         for (int i = 0, total = (int) (360 / calibrationDegree); i < total; i++) {
             if (i % calibrationDegreeInterval == 0) {
-                canvas.drawLine(startX, startY, stopX, stopY2, mPaint_Calibration_Strong);//绘制整点长的刻度
+                canvas.drawLine(startX, startY, stopX, stopY2, mPaint_Calibration_Strong); // 绘制整点长的刻度
             } else {
-                canvas.drawLine(startX, startY, stopX, stopY1, mPaint_Calibration);//绘制非整点处短的刻度
+                canvas.drawLine(startX, startY, stopX, stopY1, mPaint_Calibration); // 绘制非整点处短的刻度
             }
-            canvas.rotate(calibrationDegree, getWidth() / 2f, getHeight() / 2f);//以圆中心进行旋转
+            canvas.rotate(calibrationDegree, frameCenterX, frameCenterY); // 以圆中心进行旋转
         }
-        //绘制完后，记得把画布状态复原
         canvas.restore();
     }
 
@@ -187,7 +186,7 @@ public class DialView extends View {
         resetPaint();
         mPaint.setStrokeWidth(frameStrokeWidth);
         mPaint.setColor(frameColor);
-        //
+        // 
         float width_half = frameStrokeWidth / 2f;
         canvas.drawCircle(frameCenterX, frameCenterY, frameRadius - width_half, mPaint);
     }
@@ -202,10 +201,10 @@ public class DialView extends View {
         mPaint.setStrokeWidth(frameStrokeWidth);
         mPaint.setColor(frameCoverColor);
         float width_half = frameStrokeWidth / 2f;
-        RectF rectF = new RectF(0, 0, getWidth(), getHeight());
+        RectF rectF = new RectF(frameCenterX - frameRadius, frameCenterY - frameRadius, frameCenterX + frameRadius, frameCenterY + frameRadius);
         rectF.inset(width_half, width_half);
         canvas.save();
-        canvas.rotate(-90, frameCenterX, frameCenterY);//以圆中心进行旋转
+        canvas.rotate(-90, frameCenterX, frameCenterY); // 以圆中心进行旋转
         if (runDegree <= 360) {
             canvas.drawArc(rectF, 0, runDegree, false, mPaint);
         } else {
@@ -223,8 +222,8 @@ public class DialView extends View {
 
     private void resetPaint() {
         mPaint.reset();
-        mPaint.setStyle(Paint.Style.STROKE);//设置描边
-        mPaint.setAntiAlias(true);//设置抗锯齿，使圆形更加圆滑
+        mPaint.setStyle(Paint.Style.STROKE);// 设置描边
+        mPaint.setAntiAlias(true);// 设置抗锯齿，使圆形更加圆滑
     }
 
     @Override
